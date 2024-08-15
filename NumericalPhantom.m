@@ -178,10 +178,10 @@ imshow(combined_image_i, []);
 pixel_displacement=0:15;
 figure
 plot(pixel_displacement,phi_x)
-title('Entropy as a function of prostate displacement')
-xlabel('Displacement of the prostate (in pixels)')
-ylabel('Entropy quality metric')
-
+title('Entropy as a function of prostate displacement', 'FontSize', 20)
+xlabel('Displacement of the prostate (in pixels)', 'FontSize', 18)
+ylabel('Entropy quality metric', 'FontSize', 18)
+set(gca, 'FontSize', 16);   
 
 %% Loop for fixed x different rows
 phi_fixedx=[];
