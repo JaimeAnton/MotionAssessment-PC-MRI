@@ -131,10 +131,12 @@ for index_i=0:15
     prostate_maski = ((X - prostate_centeri(1)) / prostate_axis_lengths(1)).^2 + ...
     ((Y - prostate_centeri(2)) / prostate_axis_lengths(2)).^2 <= 1;
     numerical_phantom_i = background_intensity * ones(image_size);
+
     %Creating motion numerical phantom
     numerical_phantom_i(body_mask) = body_intensity;
     numerical_phantom_i(prostate_maski) = prostate_intensity;
     numerical_phantom_i(rectum_mask) = rectum_intensity;
+
     % Computing FFT of the numerical phantom
     numerical_phantom_fft_i = fftshift(fft2(ifftshift(numerical_phantom_i)));
 
@@ -224,19 +226,6 @@ IK3 = mat2gray(real(combined_image_fft3),[0,256]);
 f1_fft3=sum(abs(Gyk3),'all')/mean(real(combined_image_fft3),'all');
 f1_grad_kspace=[f1_fft; f1_fft2; f1_fft3];
 
-
-% Display the gradient magnitude image
-figure;
-subplot(1,3,1)
-imshow(Gy);
-title('Gradient of Numerical Phantom no motion');
-subplot(1,3,2)
-imshow(Gy2);
-title('Gradient of Numerical Phantom 2');
-subplot(1,3,3)
-imshow(Gy3);
-title('Gradient of Numerical Phantom 3');
-
 % Entropy
 [h, binLocations]=imhist(I);
 h(h==0) = []; %remove zero entries
@@ -268,18 +257,6 @@ Grad_entropy2=-sumabs(h_e2.*log2(abs(h_e2)));
 h_e3=abs(Gy3)./f1_3;
 Grad_entropy3=-sumabs(h_e3.*log2(abs(h_e3)));
 Grad_Entropy_phantom=[Grad_entropy; Grad_entropy2; Grad_entropy3];
-
-%plotting it
-figure
-subplot(1,3,1)
-imshow(h_e.*log2(abs(h_e)),[])
-title('No motion')
-subplot(1,3,2)
-imshow(h_e2.*log2(abs(h_e2)),[])
-title('Some motion')
-subplot(1,3,3)
-imshow(h_e3.*log2(abs(h_e3)),[])
-title('More motion')
 
 %hmax(max(h_e2.*log2(abs(h_e2))))
 B = imresize(mat2gray(h_e2.*log2(abs(h_e2))),[8 8]);
@@ -1025,234 +1002,3 @@ title('Entropy as a function of prostate displacement "Multi-shot"', 'FontSize',
 xlabel('Displacement of the prostate (in pixels)', 'FontSize', 18)
 ylabel('Entropy quality metric', 'FontSize', 18)
 set(gca, 'FontSize', 16);
-
-
-%% Opening up real world images (no motion dataset)
-
-%CLMRRV0004
-V1_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0004/Clmrrv0004/Rrv - 695211638/Exported_Series_5334');
-
-%CLMRRV0009
-V2_NM =dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0009/Clmrrv0009/Clmrrv - 726828182/T2W_Axial_401');
-
-%CLMRRV010
-V3_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0010/Clmrrv0010/Clmrrv - 726834017/T2W_Axial_401');
-
-%CLMRRV0011
-V4_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0011/Clmrrv0011/Clmrrv - 727096510/T2W_Axial_401');
-
-%CLMRRV0016
-V5_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0016/Clmrrv0016/Clmrrv - 726232198/T2W_Axial_401');
-
-%CLMRRV0022
-V6_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0022/Clmrrv0022/Clmrrv - 725963766/T2W_Axial_401');
-
-%CLMRRV0045
-V7_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0045/Clmrrv0045/Clmrrv - 726137095/T2W_Axial_401');
-
-%CLMRRV0048
-V8_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0048/Clmrrv0048/Clmrrv - 726737131/T2W_TSE_ax_401');
-
-%CLMRRV0049
-V9_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0049/Clmrrv0049/Clmrrv - 727344760/T2W_Axial_301');
-
-%CLMRRV0052
-V10_NM = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/motion_free/CLMRRV0052/Clmrrv0052/Clmrrv - 726569830/T2W_Axial_401');
-
-% %%
-% figure(2)
-% for i=9:19
-%     subplot(3,4,i-8)
-%     imshow(V8_NM(:,:,1,i),[])
-% 
-% end
-
-%% Determine slices of interest for each dataset
-
-M = cell(4, 1) ;
-M{1} = V1_NM(:,:,1,13:18);
-M{2} = V2_NM(:,:,1,11:17);
-M{3} = V3_NM(:,:,1,11:18);
-M{4} = V4_NM(:,:,1,10:18);
-
-M{5} = V5_NM(:,:,1,12:19);
-M{6} = V6_NM(:,:,1,10:18);
-M{7} = V7_NM(:,:,1,12:18);
-M{8} = V8_NM(:,:,1,9:21);%this dataset looks different, why?
-M{9} = V9_NM(:,:,1,9:19);
-M{10} = V10_NM(:,:,1,13:19);
-
-min_max=zeros(11,2);
-for gindex = 1:11
-    if gindex == 1 
-            min_max(gindex,1)=13;
-            min_max(gindex,2)=18;
-    elseif gindex == 2
-            min_max(gindex,1)=11;
-            min_max(gindex,2)=17;    
-    elseif gindex == 3
-            min_max(gindex,1)=11;
-            min_max(gindex,2)=18;
-    elseif gindex == 4 || gindex == 6
-        min_max(gindex,1)=10;
-        min_max(gindex,2)=18;
-    elseif gindex == 5
-        min_max(gindex,1)=12;
-        min_max(gindex,2)=19;
-    elseif gindex == 8
-        min_max(gindex,1)=9;
-        min_max(gindex,2)=21;
-    elseif gindex == 7
-        min_max(gindex,1)=12;
-        min_max(gindex,2)=18;
-    elseif gindex == 9
-        min_max(gindex,1)=9;
-        min_max(gindex,2)=19;
-    else
-        min_max(gindex,1)=13;
-        min_max(gindex,2)=19;  
-    end
-end
-
-%% Previously defined ROI for each set of images (Done once and saved on a file and used it from there)
-% 
-% % Define manually a ROI for each set of images and save them
-% % roi=zeros(11,4);
-% for index_roi=3
-%     image=M{index_roi}(:, :, :,1);
-%     figure(15)
-%     imshow(image,[])
-%     r = drawrectangle();
-%     roi(index_roi,:)=r.Position;
-% end
-% writematrix(roi,'Manual_ROIs_No_Motion.xls')
-
-
-%% Automated Entropy and Polynomial fit calculations (+Rajski+Plotting manual scoring per slice)
-roi=readmatrix('Manual_ROIs_No_Motion.xls');
-
-I_roi=[];
-Ge_matrix=zeros(10,11);
-residuals_matrix=zeros(11,11);
-poly_matrix=zeros(11,4);
-Rajski_distance=zeros(11,11);
-Matrix_av_d=zeros(1,10);
-
-%looping for each dataset
-for index_v=1:10
-    Number_of_slices=size(M{index_v});
-    x=roi(index_v,1);
-    y=roi(index_v,2);
-    width=roi(index_v,3);
-    height=roi(index_v,4);
-    for index_slice=1:Number_of_slices(4)
-        roi_image = mat2gray(M{index_v}(y:y+height-1, x:x+width-1, :,:));
-        I_roi =roi_image(:, :, :,index_slice);
-
-        %entropy calculation and saving it in a matrix
-        Ge_matrix(index_v,index_slice) = entropy(I_roi);
-
-        %Calculation of Rajski distance
-        if index_slice ~= 1
-            [MI, JE] = mutualinfo(I_roi,Previous_I_roi);
-            Rajski_distance(index_v,index_slice)=1-MI/JE;
-        end
-        Previous_I_roi=I_roi;
-        
-        %Calculate other metrics here
-
-
-        % if index_v==11
-        %     figure(16)
-        %     subplot(4,3,index_slice)
-        %     imshow(I_roi)
-        %     hold on;
-        % end
-    end
-
-    %Creatinf the polynomial fit
-    i_min=min_max(index_v,1);
-    i_max=min_max(index_v,2);
-    poly_matrix(index_v,:) = polyfit(i_min:i_max,Ge_matrix(index_v,1:index_slice),3);
-
-    % Calculate residuals
-    residuals_matrix(index_v, 1:Number_of_slices(4)) = Ge_matrix(index_v, 1:Number_of_slices(4)) - polyval(poly_matrix(index_v,:),i_min:i_max);
-    
-    %Plotting figure entropy
-    figure(21)
-    subplot(3,4,index_v)
-    plot(i_min:i_max,Ge_matrix(index_v,1:length(i_min:i_max)))
-    hold on;
-    title('Plot of Entropy for each slice', index_v)
-    xx=linspace(i_min,i_max);
-    plot(xx,polyval(poly_matrix(index_v,:),xx))
-    xlabel('Slice number')
-    ylabel('Entropy')
-    %legend('Entropy plot for each slice','Polynomial fit')
-    ax = gca;
-    ax.FontSize = 17;
-    %Calculating Average distance from polynomial
-    average_distance=10*sum(abs(polyval(poly_matrix(index_v,:),i_min:i_max)-Ge_matrix(index_v,1:length(i_min:i_max))))/length(i_min:i_max);
-    Matrix_av_d(index_v)=average_distance;
-    
-    % %Plotting figure Rajski distance
-    % figure(22)
-    % subplot(3,4,index_v)
-    % ylim([0.78 0.95])
-    % plot(i_min+1:i_max,Rajski_distance(index_v,2:length(i_min:i_max)))
-    % hold on;
-    % title('Rajski distance for each slice', index_v)
-    % xlabel('Slice number')
-    % ylabel('Rajski distance')
-
-    % %Plotting manual scoring for each slice
-    % figure(23)
-    % subplot(3,4,index_v)
-    % N=length(i_min:i_max);
-    % c=zeros(N,3); %allocate colors
-    % Manual_Scoring= ManualScore(index_v).values;
-    % for i=1:N
-    %     if Manual_Scoring(i)>4 
-    %         c(i,:)=[1,0,0]; 
-    %     elseif Manual_Scoring(i)==4 
-    %         c(i,:)=[1,0.7,0]; 
-    %     elseif Manual_Scoring(i)==3 
-    %         c(i,:)=[1,1,0]; 
-    %     elseif Manual_Scoring(i)==2
-    %         c(i,:)=[0.7,1,0]; 
-    %     elseif Manual_Scoring(i)==1
-    %         c(i,:)=[0,1,0]; 
-    %     else
-    %         c(i,:)=[0,0,0]; 
-    %     end
-    % end
-    % scatter(i_min:i_max,Ge_matrix(index_v,1:length(i_min:i_max)),150,c,'filled'); hold on
-    % plot(i_min:i_max,Ge_matrix(index_v,1:length(i_min:i_max)),'-k'); hold on  %add line connecting the points, as you requested
-    % xx=linspace(i_min,i_max);
-    % plot(xx,polyval(poly_matrix(index_v,:),xx)); hold off
-    % xlabel('Slice number')
-    % ylabel('Entropy')
-    % %legend('Manual scoring','Entropy plot for each slice','Polynomial fit')
-
-end
-
-% %% Plotting single graphs
-% figure(105)
-% plot(7:16,Ge_matrix(3,:))
-% hold on;
-% title('Plot of Entropy for each slice of CLM053')
-% x3=linspace(7,16);
-% plot(x3,polyval(poly_matrix(3,:),x3))
-% xlabel('Slice number')
-% ylabel('Entropy')
-% legend('Entropy plot for each slice','Polynomial fit')
-% 
-% figure(106)
-% plot(10:18,Ge_matrix(4,1:9))
-% hold on;
-% title('Plot of Entropy for each slice of mshp1')
-% x4=linspace(10,18);
-% plot(x4,polyval(poly_matrix(4,:),x4))
-% xlabel('Slice number')
-% ylabel('Entropy')
-% legend('Entropy plot for each slice','Polynomial fit')
