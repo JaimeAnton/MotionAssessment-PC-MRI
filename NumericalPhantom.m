@@ -108,18 +108,6 @@ end
 combined_image2 = fftshift(ifft2(ifftshift(combined_image_fft2)));
 combined_image3 = fftshift(ifft2(ifftshift(combined_image_fft3)));
 
-
-% %Taking even and odd elements of images
-% combined_image2 = zeros(size(numerical_phantom));% Initializing the new image
-% 
-% for row = 1:size(numerical_phantom, 1)
-%     if mod(row, 2) == 1 %Calculating the modulus to keep only odd rows from numerical_phantom
-%         combined_image2(row, :) = numerical_phantom(row, :);
-%     else %Keeping the even rows from numerical_phantom2
-%         combined_image2(row, :) = numerical_phantom2(row, :);
-%     end
-% end
-
 % Display the combined images
 figure;
 subplot(1, 2, 1);
@@ -128,8 +116,6 @@ title('Combined Numerical Phantom 2 (halfs)');
 subplot(1, 2, 2);
 imshow(abs(combined_image3), []);
 title('Combined Numerical Phantom 3 (halfs)');
-% imshow(combined_image2, []);
-% title('Combined Numerical Phantoms (Odd and even rows)');
 
 %% Creating additional motion numerical phantoms
 % Loop increasing the displacement and plot
@@ -184,6 +170,7 @@ ylabel('Entropy quality metric', 'FontSize', 18)
 set(gca, 'FontSize', 16);   
 
 %% Loop for fixed x different rows
+
 phi_fixedx=[];
 for index_row=1:255
     for row = 1:size(numerical_phantom_fft, 1)
@@ -210,15 +197,7 @@ title('Entropy as a function of row number in which images were combined')
 xlabel('Row number')
 ylabel('Entropy quality metric')
 
-
-%Creating a graph showing the displacement as a function of time (abrupt change)
-
-
-%Graph showing proportion of rows from each image (linear relationship)
-
-
 %% Applying evaluation of motion metrics
-
 
 % Gradient
 I = mat2gray(numerical_phantom,[0,256]);
@@ -232,10 +211,6 @@ I3 = mat2gray(real(combined_image3),[0,256]);
 f1_3=sum(abs(Gy3),'all');% divide to normalise by mean pixel value
 f1_grad_images=[f1; f1_2; f1_3];
 
-%%
-% figure
-% imshow(I3,[])
-%%
 
 %Trying gradient of K-space calculation
 IK = mat2gray(real(numerical_phantom_fft),[0,256]);
@@ -248,40 +223,6 @@ IK3 = mat2gray(real(combined_image_fft3),[0,256]);
 [Gxk3,Gyk3] = imgradientxy(IK3,'central');
 f1_fft3=sum(abs(Gyk3),'all')/mean(real(combined_image_fft3),'all');
 f1_grad_kspace=[f1_fft; f1_fft2; f1_fft3];
-
-%Possible normalisation strategies of the gradient
-
-
-
-
-
-% grad=[1;0;-1];
-% gradient_matrix=zeros(256,256);
-% for i=1:256
-%     for j=1:256
-%         gradient_matrix(i,j)=sum(abs(grad*numerical_phantom_fft(i,j)));
-%     end
-% end
-% numerical_phantom_corrected = ifftshift(ifft2(fftshift(gradient_matrix)));
-
-
-% figure;
-% subplot(1, 4, 1);
-% imshow(numerical_phantom, []);
-% title('Original Numerical Phantom');
-% subplot(1, 4, 2);
-% imshow(numerical_phantom_corrected, []);
-% title('Motion corrected phantom');
-% subplot(1, 4, 3);help 
-% imagesc(log(abs(numerical_phantom_fft) + 1));
-% colormap('gray');
-% axis square;
-% title('Original FFT phantom');
-% subplot(1, 4, 4);
-% imagesc(log(abs(gradient_matrix) + 1));
-% colormap('gray');
-% axis square;
-% title('Motion corrected fft phantom');
 
 
 % Display the gradient magnitude image
@@ -327,7 +268,8 @@ Grad_entropy2=-sumabs(h_e2.*log2(abs(h_e2)));
 h_e3=abs(Gy3)./f1_3;
 Grad_entropy3=-sumabs(h_e3.*log2(abs(h_e3)));
 Grad_Entropy_phantom=[Grad_entropy; Grad_entropy2; Grad_entropy3];
-%plotting it to see what contributes to the metric
+
+%plotting it
 figure
 subplot(1,3,1)
 imshow(h_e.*log2(abs(h_e)),[])
@@ -426,307 +368,8 @@ SumSquaresEntropy=100*(Sum_of_squares_Entropy-Sum_of_squares_Entropy(1))./Sum_of
 
 Tab_metrics2 = table(v, F1, Entropy, Entropy2, Grad_Entropy, Norm_Grad_sq,Lapl1,Lapl2,AC1,AC2,Cube_norm,SumSquaresEntropy)
 writetable(Tab_metrics2,'Tablesdata.xlsx','Sheet',2,'Range','D1')
-%Present and compare data(export to excel?)
-
-%Calculating how each metric is performing to compare them (calculate M?)
-
 
 %% Rajski cost function
 Rajski_CF=1-I./Ge;
 Rajski_CF2=1-I2./Ge2;
 Rajski_CF3=1-I3./Ge3;
-
-%% Opening up real world images
-
-%Open and loading images (use dicom functions)
-collection_data = dicomCollection('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/inn129/DICOM/I12');
-%Using dicombrowser to export the volume to workspace (V)
-%dicomBrowser('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/inn129/DICOM/I12')
-%Displaying image on MATLAB, The dimensions of V are [rows, columns, samples, slices]
-V12 = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/inn129/DICOM/I12');
-V14 = dicomreadVolume('/Users/jaime/Library/CloudStorage/OneDrive-SharedLibraries-UniversityCollegeLondon/Atkinson, David - Jaime_shared/DataForJaime/inn129/DICOM/I14');%no motion
-
-figure;
-image1=V12(:,:,1,20);
-image2=V14(:,:,1,20);
-subplot(1,2,1)
-imshow(image1,[])
-subplot(1,2,2)
-imshow(image2,[])
-
-
-%Define a ROI for each image or set of images
-r1 = drawrectangle();
-position=r1.Position;
-%Convert the position to integer coordinates
-x = round(position(1));
-y = round(position(2));
-width = round(position(3));
-height = round(position(4));
-% Create a binary mask of the ROI
-mask = createMask(r1);
-% Extract the ROI from the original image
-roi_image12 = image1(y:y+height-1, x:x+width-1, :);
-roi_image14 = image2(y:y+height-1, x:x+width-1, :);
-% Display the ROI image
-figure;
-tiledlayout(1,2,'TileSpacing','Compact');
-%subplot(1,2,1)
-nexttile
-imshow(roi_image12,[]);
-title('ROI Image 12');
-%subplot(1,2,2)
-nexttile
-imshow(roi_image14,[]);
-title('ROI Image 14');
-
-
-
-%% Evaluate motion metrics in real world data (repeat previous metrics on MRI images)
-% Gradient Entropy (normalised)
-I_inn129_12 = mat2gray((roi_image12),[0,256]);
-Ge_inn129_12 = entropy(I_inn129_12);
-I_inn129_14 = mat2gray((roi_image14),[0,256]);
-Ge_inn129_14 = entropy(I_inn129_14);
-
-%Iterating over volume (from image 14 to 20)
-image_12=V12(:,:,1,14:20);
-image_14=V14(:,:,1,14:20);
-
-Ge_12=[];
-Ge_14=[];
-Lapl1_12=[];
-Lapl2_12=[];
-
-
-Laplace=[-1 -2 -1; -2 12 -2; -1 -2 -1];
-Laplace2=[0 1 0; 1 -4 1; 0 1 0];
-I_14=[];
-figure(100)
-tiledlayout(2,7,'TileSpacing','Compact');
-for index=1:7
-    roi_images_12 = image_12(y:y+height-1, x:x+width-1, :,index);
-    roi_images_14= image_14(y:y+height-1, x:x+width-1, :,index);
-    
-    %Plot all ROI images to see where the problem can be
-    %subplot(2,7,index)
-    nexttile(index)
-    imshow(roi_images_12,[]);
-    title(sprintf('Slice %d', index))
-    hold on;
-    %subplot(2,7,index+7)
-    nexttile(index+7)
-    imshow(roi_images_14,[]);
-    title(sprintf('Slice %d', index))
-    %h1 = text(-0.25, 0.5,'row 1');
-
-    I_12 = mat2gray((roi_images_12),[0,512]);
-    Ge_12(index) = entropy(I_12);
-    Lapl1_12(index)=sumabs(conv2(I_12, Laplace, 'same'));
-    Lapl2_12(index)=sumabs(conv2(I_12, Laplace2, 'same'));
-    
-    [Gx,Gy] = imgradientxy(I_12,'central');
-    f1=sum(abs(Gy),'all');
-    h_e=abs(Gy)./f1;
-    Grad_entropy_12(index)=-sumabs(h_e.*log2(abs(h_e)));
-    %Calculating the normalised gradient square
-    Norm_Grad_sq_12(index)=sum((abs(Gy)./sum(abs(Gy),'all')).^2,'all');
-
-    I_14 = mat2gray((roi_images_14),[0,512]);
-    Ge_14(index) = entropy(I_14);
-    Lapl1_14(index)=sumabs(conv2(I_14, Laplace, 'same'));
-    Lapl2_14(index)=sumabs(conv2(I_14, Laplace2, 'same'));
-
-    [Gx,Gy] = imgradientxy(I_14,'central');
-    f1=sum(abs(Gy),'all');
-    h_e=abs(Gy)./f1;
-    Grad_entropy_14(index)=-sumabs(h_e.*log2(abs(h_e)));
-    Norm_Grad_sq_14(index)=sum((abs(Gy)./sum(abs(Gy),'all')).^2,'all');
-
-
-
-
-
-end
-
-%Plotting those examples
-figure(101)
-plot(14:20,Ge_12)
-hold;
-plot(14:20,Ge_14)
-title('Plot of Entropy for each slice')
-xlabel('Slice number')
-ylabel('Entropy')
-ax = gca;
-ax.FontSize = 17; 
-
-%put a circle to indicate each motion in the plot
-X=[14 16 18 20];
-Y=[Ge_12(1) Ge_12(3) Ge_12(5) Ge_12(7)];
-plot(X,Y,'o','MarkerEdgeColor','k','MarkerSize',15)
-
-
-%Plotting other metrics (Laplacian, Grad entropy, AC2)
-figure(102)
-plot(14:20,Lapl1_12)
-hold on;
-plot(14:20,Lapl1_14)
-hold on;
-title('Plot of Laplace 1 metric for each slice')
-xlabel('Slice number')
-ylabel('Laplcae 1 metric')
-Y=[Lapl1_12(1) Lapl1_12(3) Lapl1_12(5) Lapl1_12(7)];
-plot(X,Y,'o','MarkerEdgeColor','k','MarkerSize',15)
-ax = gca;
-ax.FontSize = 17; 
-
-% figure(103)
-% plot(14:20,Lapl2_12)
-% hold;
-% plot(14:20,Lapl2_14)
-% title('Plot of Laplace 2 metric for each slice')
-% xlabel('Slice number')
-% ylabel('Laplcae 2 metric')
-
-figure(104)
-plot(14:20,Grad_entropy_12)
-hold;
-plot(14:20,Grad_entropy_14)
-title('Plot of Gradient Entropy metric for each slice')
-xlabel('Slice number')
-ylabel('Gradient entropy metric')
-X=[14 16 18 20];
-Y=[Grad_entropy_12(1) Grad_entropy_12(3) Grad_entropy_12(5) Grad_entropy_12(7)];
-plot(X,Y,'o','MarkerEdgeColor','k','MarkerSize',15)
-% legend('I12','I14','motion')
-ax = gca;
-ax.FontSize = 17; 
-
-figure(105)
-plot(14:20,Norm_Grad_sq_12)
-hold;
-plot(14:20,Norm_Grad_sq_14)
-title('Plot of Normalised Gradient squared for each slice')
-xlabel('Slice number')
-ylabel('Normalised Gradient squared metric')
-X=[14 16 18 20];
-Y=[Norm_Grad_sq_12(1) Norm_Grad_sq_12(3) Norm_Grad_sq_12(5) Norm_Grad_sq_12(7)];
-plot(X,Y,'o','MarkerEdgeColor','k','MarkerSize',15)
-% legend('I12','I14','motion')
-ax = gca;
-ax.FontSize = 17; 
-%% See contribution to metric in blocs (compare motion and no motion)
-%Gradient contribution in blocs
-[Gx12,Gy12] = imgradientxy(I_12,'central');
-h_ee2=abs(I_12)./sum(abs(I_12),'all');
-max(max(h_ee2.*log2(abs(h_ee2))));
-B2 = mat2gray(h_ee2.*log2(abs(h_ee2)));
-figure
-imshow(B2,[],InitialMagnification='fit')%make it bigger in display
-
-figure
-imshow(I_12,[])
-%% use other metrics for same ROI
-Laplace=[-1 -2 -1; -2 12 -2; -1 -2 -1];
-Laplace2=[0 1 0; 1 -4 1; 0 1 0];
-
-
-Metrics_12=zeros(7,8);
-Metrics_14=zeros(7,8);
-for index=1:7
-    roi_images_12 = image_12(y:y+height-1, x:x+width-1, :,index);
-    roi_images_14= image_14(y:y+height-1, x:x+width-1, :,index);
-    I_12 = mat2gray((roi_images_12),[0,512]);
-    I_14 = mat2gray((roi_images_14),[0,512]);
-    [Gx_12,Gy_12] = imgradientxy(I_12,'central');
-    [Gx_14,Gy_14] = imgradientxy(I_14,'central');
-    %Normalised Gradient Squared
-    Metrics_12(index,1) = sum((abs(Gy_12)./sum(abs(Gy_12),'all')).^2,'all');
-    Metrics_14(index,1) = sum((abs(Gy_14)./sum(abs(Gy_14),'all')).^2,'all');
-    % Laplacian 1
-    Metrics_12(index,2) = sumabs(conv2(I_12, Laplace, 'same'));
-    Metrics_14(index,2) = sumabs(conv2(I_14, Laplace, 'same'));
-    % Laplacian 2
-    Metrics_12(index,3) = sumabs(conv2(I_12, Laplace2, 'same'));
-    Metrics_14(index,3) = sumabs(conv2(I_14, Laplace2, 'same'));
-    
-    %Cube of Normalised intensities,only for squared
-    %matrix?
-    %Metrics_12(index,4) = sum((I_12./sum(I_12,'all'))^3,'all');
-    %Metrics_14(index,4) = sum((I_14./sum(I_14,'all'))^3,'all');
-    
-    %Sum of squares Entropy normalisation (David's paper), only for squared
-    %matrix?
-    B_max_12=sqrt(sum(I_12.^2,'all'));
-    %Metrics_12(index,5) =-sum((I_12./B_max_12)*log(I_12./B_max_12),'all');
-    B_max_hel14=sqrt(sum(I_14.^2,'all'));
-    %Metrics_14(index,5) =-sum((I_14./B_max_14)*log(I_14./B_max_14),'all');
-    
-    %Autocorrelation 1
-    a=size(I_12);
-    for AC_index=1:a(1)
-        for AC_indexj=1:a(2)
-            if AC_indexj+2<a(2)%How should I handle edge cases?
-                Plus1_12(AC_index,AC_indexj)=I_12(AC_index,AC_indexj)*I_12(AC_index,AC_indexj+1);
-                Plus1_14(AC_index,AC_indexj)=I_14(AC_index,AC_indexj)*I_14(AC_index,AC_indexj+1);
-            end
-            if AC_indexj+2<a(2)
-                Plus2_12(AC_index,AC_indexj)=I_12(AC_index,AC_indexj)*I_12(AC_index,AC_indexj+2);
-                Plus2_14(AC_index,AC_indexj)=I_14(AC_index,AC_indexj)*I_14(AC_index,AC_indexj+2);
-            end
-        end    
-    end
-    Metrics_12(index,6)=sum(I_12.^2,'all')-sum(Plus1_12,'all');
-    Metrics_14(index,6)=sum(I_14.^2,'all')-sum(Plus1_14,'all');
-    %Autocorrelation 2
-    Metrics_12(index,7) = sum(Plus1_12,'all')-sum(Plus2_12,'all');
-    Metrics_14(index,7) = sum(Plus1_14,'all')-sum(Plus2_14,'all');
-    
-    %Gradient
-
-end
-%plot all metrics in a unique graph
-
-%Plot slice vs motion score? How to calculate the motion score?
-
-
-%% Calculate the same metrics for the whole image
-figure(102)
-tl = tiledlayout(2,7,'TileSpacing','Compact');
-for index=1:7
-    images_12 = image_12(:, :, :,index);
-    images_14= image_14(:, :, :,index);
-    
-    %Plot all ROI images to see where the problem can be
-    %subplot(2,7,index)
-    nexttile(index)
-    imshow(images_12,[]);
-    title(sprintf('Slice %d', index))
-    %subplot(2,7,index+7)
-    nexttile(index+7)
-    imshow(images_14,[]);
-    title(sprintf('Slice %d', index))
-    %h1 = text(-0.25, 0.5,'row 1');
-
-    I_im_12 = mat2gray(images_12,[0,512]);
-    Ge_im_12(index) = entropy(I_im_12);
-    I_im_14 = mat2gray(images_14,[0,512]);
-    Ge_im_14(index) = entropy(I_im_14);
-end
-%Plotting those examples
-figure(103)
-plot(14:20,Ge_im_12)
-hold;
-plot(14:20,Ge_im_14)
-title('Plot of Entropy for each slice')
-xlabel('Slice number')
-ylabel('Entropy')
-
-%put a circle to indicate each motion in the plot
-X1=[14 16 18 20];
-Y1=[Ge_im_12(1) Ge_im_12(3) Ge_im_12(5) Ge_im_12(7)];
-plot(X1,Y1,'o','MarkerEdgeColor','k','MarkerSize',15)
-legend('I12','I14','motion')
-
-%Creating a table summarising the metrics results
-v1=transpose(14:20);
